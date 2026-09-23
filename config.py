@@ -41,8 +41,8 @@ DB_CONFIG = {
     "database": _secret("DB_NAME"),
 }
 
-# Where the vector database (Chroma) saves its files
-CHROMA_DIR = "chroma_db"
+# Vector store = MySQL table `chunks` (fallback: local_data.json)
+# No Chroma. Embeddings are produced locally by sentence-transformers.
 
 # The model we use (all free)
 LLM_MODEL = "openai/gpt-oss-120b"            # Groq's free model (available on this key)

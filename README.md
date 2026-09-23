@@ -10,12 +10,12 @@ User question
 Streamlit UI (app.py)
    ↓
 rag.py — the RAG pipeline:
-   1) RETRIEVE: Chroma finds the 3 most similar text chunks (vector search,
-      embeddings computed locally by sentence-transformers)
+   1) RETRIEVE: MySQL `chunks` table — embed the question (sentence-transformers
+      on CPU), cosine-rank stored vectors, take the top 3
    2) AUGMENT:  chunks are pasted into the LLM prompt as context
-   3) GENERATE: Groq's Llama-3.3-70B writes the answer from that context
+   3) GENERATE: Groq LLM writes the answer from that context
    ↓
-database.py — saves the Q&A into MySQL (chat_logs table)
+database.py — saves the Q&A into MySQL (chat_logs table; JSON fallback)
    ↓
 Answer shown to user + 👍/👎 feedback saved to MySQL
 ```
@@ -26,8 +26,8 @@ Answer shown to user + 👍/👎 feedback saved to MySQL
 |---|---|---|
 | `app.py` | The whole UI (chat + admin pages) | Start here |
 | `rag.py` | RAG pipeline: retrieve → augment → generate | The brain |
-| `ingest.py` | Splits PDFs into chunks and stores them in Chroma | Runs when uploading |
-| `database.py` | All MySQL work (3 tables: documents, chat_logs, feedback) | The SQL part |
+| `ingest.py` | Splits PDFs into chunks and stores them in MySQL `chunks` | Runs when uploading |
+| `database.py` | All MySQL work (documents, chat_logs, feedback, **chunks**) | The SQL part |
 | `config.py` | Reads secrets from `.env` / Render dashboard | Security |
 | `knowledge_base.txt` | Starter facts the bot knows | Demo data |
 
@@ -69,15 +69,15 @@ Open http://localhost:8501 — chat away. Admin page password is in `.env` (`ADM
 
 **Free MySQL that never expires:** https://aiven.io/free-mysql-database → create free MySQL → copy the "Connection information" values into `.env` / Render.
 
-### One warning about Render free tier
-- App sleeps after 15 min idle → open the link 5 min before demo to wake it
-- Chroma data lives on the app's disk → if you re-deploy, re-run `python ingest.py knowledge_base.txt` (or re-upload via Admin page). Chat logs are safe in MySQL.
+### One warning about free hosting
+- App may sleep after idle → open the link a minute before demo to wake it
+- Without MySQL configured, vectors + logs live in `local_data.json` on the app disk → re-deploy wipes them; re-run `python ingest.py knowledge_base.txt` (or first-run auto-ingest / Admin upload). With MySQL keys set, all data survives re-deploys.
 
 ## Viva cheat sheet (for your friend)
 
 - **What is RAG?** Retrieval Augmented Generation — the bot searches its own notes first, then answers using them. Like an open-book exam.
 - **What is an embedding?** A list of numbers representing a sentence's meaning. Similar meaning = similar numbers.
-- **What is Chroma?** A vector database that stores embeddings and finds the most similar ones fast.
-- **What is MySQL doing here?** Saving every chat (chat_logs), uploaded files (documents), and user feedback (feedback). Show a live SELECT in the admin page.
-- **Why LangChain?** It's the glue that connects models, the vector store, and prompts with a few lines of code.
-- **Why Groq?** Free API that runs Llama 3.3 70B very fast.
+- **Where are vectors stored?** MySQL table `chunks` — each row has the text, source file, and a JSON array of floats (the embedding). Cosine similarity picks the top 3.
+- **What is MySQL doing here?** Four tables: `chunks` (knowledge + vectors), `chat_logs`, `documents`, `feedback`. Admin page shows them all as tables.
+- **Why LangChain?** It's the glue that connects models, loaders, splitters, and prompts with a few lines of code.
+- **Why Groq?** Free API that runs open LLMs very fast.

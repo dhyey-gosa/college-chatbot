@@ -8,4 +8,4 @@ node_modules/
 local_data.json
 uploads/
 .streamlit/
-# chroma_db/ is COMMITTED on purpose so cloud deploys start with data
+# chroma_db/ no longer used (vectors live in MySQL / local_data.json)
