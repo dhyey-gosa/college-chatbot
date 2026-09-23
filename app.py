@@ -21,6 +21,17 @@ st.set_page_config(page_title="CollegeBot", page_icon="🎓", layout="wide")
 # ---------- Run table setup once, show DB status in sidebar ----------
 db_status = setup_tables()
 
+# ---------- Make sure the knowledge base exists (fresh cloud deploys start empty) ----------
+try:
+    from rag import load_vectorstore as _lvs
+    _db = _lvs()
+    if _db._collection.count() == 0 and os.path.exists("knowledge_base.txt"):
+        from ingest import ingest_pdf
+        with st.spinner("Loading knowledge base (first run only)…"):
+            ingest_pdf("knowledge_base.txt")
+except Exception:
+    pass  # chat page still works; empty KB shows a friendly message
+
 with st.sidebar:
     st.title("🎓 CollegeBot")
     st.caption("RAG chatbot • LangChain • MySQL")
