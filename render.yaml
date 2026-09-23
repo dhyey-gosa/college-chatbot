@@ -1,0 +1,30 @@
+services:
+  # The chatbot web app (Streamlit)
+  - type: web
+    name: collegebot
+    runtime: python
+    plan: free
+    pythonVersion: "3.11.13"
+    # install deps + bake the knowledge base into the image at build time
+    buildCommand: pip install -r requirements.txt && python ingest.py knowledge_base.txt
+    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
+    healthCheckPath: /
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false      # you paste this in the Render dashboard
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: HF_HOME
+        value: /opt/render/project/src/.hf-cache
+      - key: PYTHONUNBUFFERED
+        value: "1"

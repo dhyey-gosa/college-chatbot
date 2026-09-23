@@ -1,0 +1,19 @@
+# CPU-only torch (~200MB) — Render free tier can't fit the CUDA build
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.14.0+cpu
+
+flask==3.0.3
+python-dotenv==1.0.1
+streamlit==1.40.0
+langchain==0.3.7
+langchain-community==0.3.7
+langchain-core==0.3.27
+langchain-groq==0.2.1
+langchain-chroma==0.1.4
+chromadb==0.5.20
+sentence-transformers==3.3.1
+langchain-huggingface==0.1.2
+pypdf==5.1.0
+pymysql==1.1.1
+cryptography==43.0.3
+gunicorn==23.0.0
